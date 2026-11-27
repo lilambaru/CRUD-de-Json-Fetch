@@ -1,0 +1,89 @@
+:root {
+  --acero: #1f2933;
+  --acero-claro: #323f4b;
+  --ambar: #f5a524;
+  --papel: #f4f1ea;
+}
+
+body {
+  background: var(--papel);
+  color: #1b1f23;
+}
+
+.cabecera-clavo {
+  background: linear-gradient(135deg, var(--acero) 0%, var(--acero-claro) 100%);
+  color: #fff;
+  border-bottom: 4px solid var(--ambar);
+}
+
+.tarjeta-clavo {
+  border: 0;
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+
+.tarjeta-clavo .card-header {
+  background: #fff;
+  border-bottom: 2px solid var(--papel);
+  padding: 0.9rem 1.1rem;
+}
+
+.btn-warning {
+  --bs-btn-bg: var(--ambar);
+  --bs-btn-border-color: var(--ambar);
+}
+
+.table thead th {
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #52606d;
+  background: #faf8f3;
+}
+
+.fila-agotada td {
+  background: #fff5f5;
+}
+
+/* skeleton mientras el fetch está en vuelo */
+.esqueleto {
+  display: block;
+  height: 0.9rem;
+  border-radius: 0.3rem;
+  background: linear-gradient(90deg, #e6e2d8 25%, #f4f1ea 50%, #e6e2d8 75%);
+  background-size: 200% 100%;
+  animation: brillo-esqueleto 1.2s ease-in-out infinite;
+}
+
+@keyframes brillo-esqueleto {
+  from { background-position: 200% 0; }
+  to   { background-position: -200% 0; }
+}
+
+/* toast propio de SweetAlert2 (mixin Tostada en script.js) */
+.tostada-clavo {
+  background: var(--acero) !important;
+  color: #f5f7fa !important;
+  border-left: 5px solid var(--ambar);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25) !important;
+}
+
+.tostada-clavo .swal2-title {
+  color: #f5f7fa !important;
+  font-size: 0.95rem;
+}
+
+.tostada-clavo .swal2-timer-progress-bar {
+  background: var(--ambar);
+}
+
+.tostada-error {
+  border-left-color: #e5484d;
+}
+
+.lista-errores-swal {
+  text-align: left;
+  margin: 0.5rem auto 0;
+  max-width: 22rem;
+  font-size: 0.95rem;
+}
