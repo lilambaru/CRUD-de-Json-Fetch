@@ -1,128 +1,224 @@
-# CRUD Fetch + PHP OOP + MySQL — Ferretería El Clavo
+<div align="center">
 
-Catálogo de productos con **guardar, editar y buscar** sin recargar la página.
-Frontend en JavaScript vanilla (Fetch + FormData) con Bootstrap 5 y SweetAlert2; backend en PHP orientado a objetos con PDO.
+![Portada de Ferretería El Clavo](assets/portada.png)
 
-## Integrantes
+# Ferretería El Clavo
 
-| Estudiante | Cédula |
-|------------|--------|
-| Javier Vallarino | 8-1040-1488 |
-| Ambar Greco | 8-1011-480 |
+**Sistema de inventario con Fetch API, PHP orientado a objetos y MySQL**
 
-## Requisitos
+`Guardar` · `Listar` · `Buscar` · `Editar` · `Validar`
 
-- XAMPP o WampServer con **PHP 8.1 o superior** y MySQL/MariaDB
-- Extensión `pdo_mysql` activa (viene por defecto)
-- Navegador moderno y conexión a internet (Bootstrap y SweetAlert2 se cargan por CDN)
+**Universidad Tecnológica de Panamá · Desarrollo Web · II semestre de 2026**
 
-## Cómo levantarlo en XAMPP
+</div>
 
-1. Copia la carpeta `crud-ferreteria-elclavo` dentro de `C:\xampp\htdocs\`.
-2. Abre el panel de XAMPP y arranca **Apache** y **MySQL**.
-3. Crea la base, la tabla, el usuario y los datos de prueba (ver siguiente sección).
-4. (Opcional) copia `.env.example` como `.env` si quieres cambiar credenciales.
-5. Entra a `http://localhost/crud-ferreteria-elclavo/`.
+---
 
-Prueba rápida del backend: `POST` con `Accion=ping` a `api/registrar.php` debe responder `{"success":true,"accion":"pong",...}`.
+## El proyecto
 
-## Base de datos y credenciales
+**Ferretería El Clavo** es una aplicación web de gestión de productos desarrollada como laboratorio de **CRUD con Fetch + PHP OOP + MySQL**. Permite registrar artículos, consultar el inventario, buscar por código o nombre y actualizar datos **sin recargar toda la página**. El sistema comunica JavaScript y PHP mediante `fetch()`, `FormData` y respuestas JSON.
 
-| Dato | Valor |
-|---|---|
-| Base | `productosdb` |
-| Usuario de la app | `tienda_app` (solo SELECT, INSERT, UPDATE, DELETE sobre `productosdb`) |
-| Clave | `Cl4vo#Tienda2026` |
-| Host | `127.0.0.1:3306` |
+| Integrantes | Cédula |
+|:--|:--|
+| **Ambar Greco** | 8-1011-480 |
+| **Javier Vallarino** | 8-1040-1488 |
 
-Comandos (desde la carpeta del proyecto, con el usuario administrador de MySQL; en XAMPP suele ser `root` sin clave):
+## Vista previa
 
-```bash
-mysql -u root -p < sql/01_esquema.sql
-mysql -u root -p < sql/02_usuario_app.sql
-mysql -u root -p < sql/04_datos_prueba.sql
-```
+![Interfaz principal del inventario de Ferretería El Clavo](assets/vista-general.webp)
 
-Estructura exacta de la tabla pedida en la guía:
+*Interfaz real del sistema: formulario de productos a la izquierda e inventario a la derecha. Captura tomada durante las pruebas locales.*
 
-```sql
-CREATE TABLE productos (
-  id       INT AUTO_INCREMENT PRIMARY KEY,
-  codigo   VARCHAR(20)   NOT NULL,
-  producto VARCHAR(100)  NOT NULL,
-  precio   DECIMAL(10,2) NOT NULL,
-  cantidad INT           NOT NULL
-);
--- además, el script agrega un índice UNIQUE sobre `codigo`
-```
+## Funcionalidades principales
 
-Para ver los privilegios del usuario de la aplicación: `sql/03_ver_privilegios.sql`
-(`SHOW GRANTS FOR 'tienda_app'@'localhost';`).
+| Función | ¿Qué permite hacer? |
+|:--|:--|
+| **Registrar** | Guardar código, nombre, precio y cantidad de un nuevo artículo. |
+| **Listar** | Mostrar el inventario recuperado desde MySQL. |
+| **Buscar** | Filtrar artículos por su código o nombre. |
+| **Editar** | Cambiar los datos de un producto existente. |
+| **Validar** | Evitar códigos repetidos, campos inválidos y existencias negativas. |
+| **Notificar** | Mostrar mensajes de error, éxito y confirmación con SweetAlert2. |
 
-> Si prefieres usar `root` en el laboratorio, crea `.env` con `DB_USER=root` y `DB_PASS=` (vacío).
+> **Alcance del laboratorio:** el ejercicio implementa crear, consultar y actualizar. **La eliminación de productos no está implementada**; se contempla como posible ampliación.
 
-## Estructura
+## Evidencias del funcionamiento
 
-```
+### 01 · Registro de productos
+
+El formulario recibe código, descripción, precio y cantidad. Al guardar, la tabla se actualiza para incluir el artículo registrado.
+
+![Formulario con los datos del nuevo producto](assets/registro-formulario.webp)
+
+![Nuevo producto visible en el inventario](assets/registro-guardado.webp)
+
+### 02 · Búsqueda dinámica
+
+Al introducir `PRU-001`, la interfaz presenta únicamente el producto coincidente, sin recargar la página completa.
+
+![Búsqueda de producto por código](assets/busqueda.webp)
+
+### 03 · Actualización de inventario
+
+La opción **Editar** recupera los datos del artículo; el sistema solicita confirmación antes de modificarlo. En la prueba, el precio pasó de **$25.50 a $30.00** y la cantidad de **15 a 20**.
+
+![Formulario en modo edición](assets/edicion.webp)
+
+![Ventana de confirmación con SweetAlert2](assets/confirmacion.webp)
+
+![Producto actualizado y notificación de éxito](assets/actualizacion.webp)
+
+### 04 · Validación de códigos duplicados
+
+La aplicación rechaza un segundo producto con el mismo código, indica qué campo debe corregirse y muestra una alerta descriptiva.
+
+![Validación de código duplicado](assets/validacion.webp)
+
+## ¿Cómo funciona?
+
+![Diagrama del flujo navegador servidor base de datos](assets/arquitectura.svg)
+
+1. **HTML y Bootstrap:** muestran el formulario, buscador y tabla.
+2. **JavaScript:** captura eventos y envía la solicitud con `fetch()` y `FormData`.
+3. **`api/registrar.php`:** recibe `Accion` y utiliza `switch` para elegir la operación.
+4. **`dominio/Producto.php`:** hidrata, valida y procesa los productos.
+5. **`nucleo/conexion.php`:** gestiona la conexión PDO y las consultas preparadas contra MySQL.
+6. **JSON + SweetAlert2:** el navegador interpreta el resultado, actualiza el contenido y muestra la notificación.
+
+El archivo `public/js/script.js` también contiene un `switch` para interpretar `respuesta.accion`, conforme a los requisitos del laboratorio.
+
+## Tecnologías utilizadas
+
+| Capa | Herramientas |
+|:--|:--|
+| Interfaz | HTML5, CSS3 y Bootstrap 5 |
+| Cliente | JavaScript, Fetch API y FormData |
+| Alertas | SweetAlert2 |
+| Servidor | PHP 8.1+ y programación orientada a objetos |
+| Datos | MySQL / MariaDB y PDO |
+| Entorno local | WampServer o XAMPP |
+
+## Organización de los archivos
+
+```text
 crud-ferreteria-elclavo/
-├── index.php              redirige a la vista principal
-├── nucleo/                conexión y piezas transversales
-│   ├── config.php         lee .env / getenv
-│   ├── conexion.php       clase ConexionDB (singleton + transaccion + insertSeguro/updateSeguro/query)
-│   └── respuesta.php      salida JSON única
-├── dominio/
-│   └── Producto.php       entidad: hidratar, validar, aArreglo, aJson, guardar, editar, buscar
 ├── api/
-│   └── registrar.php      endpoint con switch de acciones
-├── vistas/
-│   └── index.html         formulario + tabla + buscador
+│   └── registrar.php        # Endpoint y switch de acciones
+├── dominio/
+│   └── Producto.php         # Reglas de negocio y operaciones
+├── nucleo/
+│   ├── config.php           # Lee la configuración local
+│   ├── conexion.php         # Conexión PDO
+│   └── respuesta.php        # Respuestas JSON uniformes
 ├── public/
-│   ├── css/estilo.css
-│   └── js/script.js       objeto Cliente + switch sobre respuesta.accion
-└── sql/                   esquema, usuario con privilegios mínimos, grants, datos de prueba
+│   ├── css/estilo.css       # Diseño visual
+│   └── js/script.js         # Fetch, eventos y SweetAlert2
+├── sql/
+│   ├── 01_esquema.sql       # Base de datos y tabla
+│   ├── 02_usuario_app.sql   # Usuario de aplicación
+│   ├── 03_ver_privilegios.sql
+│   └── 04_datos_prueba.sql
+├── vistas/
+│   └── index.html           # Interfaz del catálogo
+├── assets/                  # Imágenes del README
+├── .env.example             # Plantilla de configuración
+├── .gitignore
+├── .htaccess
+├── index.php
+└── README.md
 ```
 
-## Contrato del API
+## Base de datos
 
-`POST api/registrar.php` con `FormData`. Campo `Accion`: `ping`, `crear` (alias `guardar`), `actualizar` (alias `modificar`), `listar`, `buscar`.
+Base de datos: **`productosdb`** · Tabla: **`productos`**
 
-Toda respuesta tiene la forma:
+| Campo | Tipo de dato | Descripción |
+|:--|:--|:--|
+| `id` | `INT` | Clave primaria autoincremental |
+| `codigo` | `VARCHAR(20)` | Código único del artículo |
+| `producto` | `VARCHAR(100)` | Nombre del producto |
+| `precio` | `DECIMAL(10,2)` | Precio unitario |
+| `cantidad` | `INT` | Existencias |
+
+![Estructura real de la tabla productos en phpMyAdmin](assets/estructura-mysql.webp)
+
+![Productos almacenados en la base de datos](assets/datos-mysql.webp)
+
+**Reglas de negocio:** al crear un producto se requieren al menos **1 unidad**; al editar se permite **0** para representar un producto agotado. Los códigos se normalizan a mayúsculas y deben ser únicos.
+
+## Instalación local con WAMP o XAMPP
+
+**Requisitos:** Apache, PHP 8.1 o superior, extensión `pdo_mysql`, MySQL/MariaDB y acceso a internet para las librerías cargadas por CDN.
+
+**1.** Coloca el proyecto en la carpeta de tu servidor local:
+
+- WAMP: `C:\wamp64\www\crud-ferreteria-elclavo`
+- XAMPP: `C:\xampp\htdocs\crud-ferreteria-elclavo`
+
+**2.** Enciende Apache y MySQL y abre phpMyAdmin. Importa estos scripts **en orden**, desde la pantalla principal del servidor MySQL:
+
+```text
+sql/01_esquema.sql       → Crea productosdb y la tabla productos
+sql/02_usuario_app.sql   → Configura el usuario y sus privilegios
+sql/04_datos_prueba.sql  → Inserta productos de ejemplo (opcional)
+```
+
+Puedes consultar los permisos con `sql/03_ver_privilegios.sql`.
+
+**3.** Copia `.env.example` como `.env` y ajusta tus datos locales:
+
+```dotenv
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_NAME=productosdb
+DB_USER=tu_usuario_local
+DB_PASS=tu_clave_local
+```
+
+**No publiques tu `.env` ni contraseñas reales en GitHub.** El archivo `.env.example` del código original incluye valores predeterminados de laboratorio; cámbialos si se reutilizan fuera del entorno local.
+
+**4.** Abre en el navegador:
+
+```text
+http://localhost/crud-ferreteria-elclavo/
+```
+
+## Contrato de la API
+
+Todas las operaciones se envían mediante `POST` a `api/registrar.php` con `FormData`. El campo `Accion` admite los siguientes valores:
+
+| Acción | Propósito |
+|:--|:--|
+| `crear` / `guardar` | Registrar un artículo |
+| `actualizar` / `modificar` | Editar un artículo |
+| `listar` | Recuperar el inventario |
+| `buscar` | Filtrar productos |
+| `ping` | Comprobar la respuesta del endpoint |
+
+Las respuestas tienen una estructura JSON consistente con `success`, `message`, `accion`, `errors` y `data`. Ejemplo **ilustrativo del formato**:
 
 ```json
-{ "success": true, "message": "...", "accion": "creado", "errors": {}, "data": {}, "timestamp": "2026-11-25T10:00:00-05:00" }
+{
+  "success": true,
+  "message": "Operación completada",
+  "accion": "creado",
+  "errors": {},
+  "data": {}
+}
 ```
 
-y un header `X-Respuesta-Id` para rastrear la petición en el Inspector de Red.
-Acciones devueltas: `creado`, `actualizado`, `listado`, `buscado`, `pong`, `error_validacion`, `no_encontrado`, `desconocida`, `error_servidor`.
+## Validación y seguridad
 
-## Reglas de negocio
+- **Cliente y servidor:** verifican entradas y comunican errores por campo.
+- **PDO y consultas preparadas:** reducen el riesgo de inyección SQL.
+- **Código único:** restricción `UNIQUE` en MySQL para impedir duplicados.
+- **Privilegios mínimos:** el usuario de la aplicación recibe permisos de lectura e inserción/actualización/eliminación de registros sobre `productosdb`, sin permisos administrativos sobre otras bases.
+- **Salida JSON uniforme:** reduce errores al analizar respuestas del backend.
 
-- Al **registrar**, la cantidad mínima es **1** (no se da de alta mercancía inexistente).
-- Al **editar**, la cantidad mínima es **0** (un producto agotado igual debe poder corregirse). El formulario cambia el `min` del input según el modo.
-- El código se guarda en mayúsculas y no puede repetirse.
+## Créditos
 
-## Decisiones de diseño
+**Ambar Greco · Javier Vallarino**  
+Universidad Tecnológica de Panamá · Desarrollo Web  
+Docente: **Ing. Irina Fong** · Grupo: **1S3122**
 
-- **Carpetas por responsabilidad, no por patrón de moda.** `nucleo` agrupa lo que sirve a todo el proyecto (conexión, config, salida JSON); `dominio` guarda las entidades; `api` contiene solo endpoints delgados. Es el mismo reparto de responsabilidades que pide la guía, con nombres que describen lo que hay dentro.
-- **Un solo punto de salida JSON.** `responder_json()` garantiza el mismo contrato en todas las rutas, descarta cualquier salida accidental con `ob_end_clean()` y agrega `timestamp` y `X-Respuesta-Id`. Así el `.json()` del navegador nunca recibe basura.
-- **`validar()` no toca la base de datos.** Devuelve un arreglo de errores por campo; la comprobación de código duplicado vive aparte (`codigoEnUso()`) y la restricción `UNIQUE` en MySQL cubre el caso de dos usuarios guardando a la vez (error 23000 → respuesta 409).
-- **Todo el tráfico del navegador pasa por el objeto `Cliente`.** Hay un único `fetch`, un único manejo de errores de red/formato y un único lugar donde se usa SweetAlert; el resto del código solo pide `exito()`, `fallo()` o `confirmar()`.
-- **Interfaz que responde mientras espera.** Skeleton en la tabla durante la carga, botón con spinner al guardar, buscador con debounce de 350 ms y descarte de respuestas atrasadas para que no se pisen resultados.
-
-## Entrega en repositorio
-
-La rúbrica pide un repositorio del laboratorio. Desde la carpeta del proyecto:
-
-```bash
-git init
-git add .
-git commit -m "CRUD Fetch + PHP OOP + MySQL"
-git branch -M main
-git remote add origin https://github.com/<tu-usuario>/<tu-repo>.git
-git push -u origin main
-```
-
-## Ampliaciones posibles
-
-- Eliminar productos (`Accion=eliminar`)
-- Paginación del listado
+Proyecto académico desarrollado para la guía **«CRUD – API Fetch y MySQL (Guardar, Editar, Buscar)»**.
