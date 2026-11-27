@@ -6,8 +6,9 @@ Frontend en JavaScript vanilla (Fetch + FormData) con Bootstrap 5 y SweetAlert2;
 ## Integrantes
 
 | Estudiante | Cédula |
-|---|---|
+|------------|--------|
 | Javier Vallarino | 8-1040-1488 |
+| Ambar Greco | 8-1011-480 |
 
 ## Requisitos
 
